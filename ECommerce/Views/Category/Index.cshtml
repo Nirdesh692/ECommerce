@@ -1,0 +1,44 @@
+﻿@model IEnumerable<ECommerce.ViewModel.CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Categories";
+    int serialNumber = 1;
+}
+<div class="container">
+    <h1 class="text-center">AllCategories</h1>
+
+    <p >
+        <a class="btn btn-primary" asp-action="Create">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    S.N.
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @serialNumber
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    <td>
+                        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id"><iconify-icon icon="carbon:edit"></iconify-icon> Edit</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><iconify-icon icon="ic:baseline-delete"></iconify-icon> Delete</a>
+                </tr>
+                serialNumber++;
+            }
+        </tbody>
+    </table>
+
+</div>

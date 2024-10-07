@@ -1,0 +1,7 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item"><a class="nav-link" asp-action="Profile" id="profile" >Profile</a></li>
+    <li class="nav-item"><a class="nav-link" id="Order" asp-action="Orders">Orders</a></li>
+</ul>

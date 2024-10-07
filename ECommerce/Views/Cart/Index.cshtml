@@ -1,0 +1,158 @@
+﻿@model ECommerce.ViewModel.CartViewModel
+@{
+    ViewData["Title"] = "Cart";
+}
+<div class="container mt-4">
+    <h2 class="mb-4">Cart</h2>
+
+    @if(Model.CartItems != null)
+    {
+        <div class="row mb-3">
+            <div class="col-3 ps-5"><strong>Product</strong></div>
+            <div class="col-3 ps-4"><strong>Quantity</strong></div>
+            <div class="col-2 text-center"><strong>Rate</strong></div>
+            <div class="col-2 ps-0 text-center"><strong>Price</strong></div>
+        </div>
+        <div class="cart-items-container" style="max-height: 400px; width:auto; overflow-y: auto; overflow-x:hidden;">
+            @foreach (var item in Model.CartItems)
+             {
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="form-check text-start">
+                            <form id="selectForm_@item.ProductId" method="post" action="@Url.Action("UpdateCartItem", "Cart")">
+                                <input type="hidden" name="CartItemId" value="@item.ProductId" />
+                                <input type="checkbox" name="selected" class="form-check-input" Id="select_@item.ProductId"
+                                       onchange="submitForm('@item.ProductId')"
+                                       value="true" @(item.Selected == true ? "checked" : "") />
+                            </form>
+                        </div>
+                        <div class="col-3 text-start">
+                            <img src="@item.ImageUrl" class="img-fluid" alt="Sofa" style="width: 120px; border-radius: 10px;">
+                        </div>
+                        <div class="col-3">
+                            <div class="input-group quantity-control">
+                                <form method="post" asp-controller="Cart" asp-action="UpdateQuantity">
+                                    <input type="hidden" name="CartItemId" value="@item.ProductId" />
+                                    <input type="hidden" name="quantity" value="-1" />
+                                    <button type="submit" class="btn btn-outline-primary">-</button>
+                                </form>
+
+                                <input id="quantity_@item.ProductId" class="btn btn-outline-primary quantity" type="text" value="@item.Quantity" readonly>
+
+                                <form method="post" asp-controller="Cart" asp-action="UpdateQuantity">
+                                    <input type="hidden" name="CartItemId" value="@item.ProductId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-outline-primary increase-btn" data-productId="@item.ProductId" data-stockQuantity="@item.StockQuantity">+</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <p id="unitPrice" class="fw-bold m-0">Rs @item.UnitPrice</p>
+                        </div>
+                        <div class="col-2">
+                            <span id="totalPrice_@item.Name" class="totalPrice fw-bold">Rs @item.TotalPrice</span>
+                        </div>
+                        <div class="col-2">
+                            <form method="post" asp-controller="Cart" asp-action="RemoveFromCart">
+                                <input type="hidden" name="cartItemId" value="@item.ProductId" />
+                                <button class="btn btn-outline-danger fs-5">&times;</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+            <a asp-controller="Shop" asp-action="ShopVIew" class="continue-shopping">&larr; Continue shopping</a>
+            <span class="cart-total fw-bold" id="grandTotal">Total: Rs @Model.GrandTotal </span>
+        </div>
+    }
+    <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Proceed
+    </button>
+    @if(Model.CartItems != null)
+    {
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Shipping Details</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" asp-controller="Shipping" asp-action="Add">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label asp-for="@Model.Address" class="control-label">Address</label>
+                                <input asp-for="@Model.Address" class="form-control" />
+                                <span asp-validation-for="@Model.Address" class="text-danger"></span>
+
+                                <label asp-for="@Model.PaymentMethodId" class="control-label">Payment Method</label>
+                                <select asp-for="@Model.PaymentMethodId" class="form-control" asp-items="ViewBag.PaymentMethodId">
+                                    <option>Select Payment Method</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <p class="h6">No Items found in Cart!!</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <a asp-controller="Shop" asp-action="ShopVIew" class="continue-shopping btn btn-primary">Continue shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function submitForm(productId){
+        var form = document.getElementById("selectForm_" + productId);
+        var checkbox = document.getElementById("select_" + productId);
+
+        var hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "selected";
+        hiddenInput.value = checkbox.checked ? "true" : "false";
+
+        form.appendChild(hiddenInput);
+        form.submit();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const increasebtn = document.querySelectorAll('.increase-btn');
+        increasebtn.forEach(button => {
+            const productId = button.getAttribute('data-ProductId');
+            const stockQuantity = parseInt(button.getAttribute('data-stockQuantity'));
+            const quantity = document.querySelector('#quantity_' + productId);
+            let currentQuantity = parseInt(quantity.value);
+            if (currentQuantity >= stockQuantity) {
+                button.ariaDisabled = true;
+            }
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                currentQuantity = parseInt(quantity.value);
+                if (currentQuantity < stockQuantity) {
+                    this.closest('form').submit();
+                }
+                if (currentQuantity + 1 >= stockQuantity) {
+                    button.disabled = true;
+                }
+            });
+        });
+    });
+</script>
